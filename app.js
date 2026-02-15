@@ -10,12 +10,16 @@
     story: []
   };
 
+  const REPLENISH_MAX = 6;
+
   const limits = {
     character: { draw: 3, keep: 2, discard: 1 },
     relationship: { draw: 2, keep: 1, discard: 1 },
     personality: { draw: 3, keep: 2, discard: 1 },
     story: { draw: 4, keep: 4, discard: 0 }
   };
+
+  const totalDrawnCount = { character: 0, relationship: 0, personality: 0, story: 0 };
 
   let currentType = 'character';
   let drawn = { character: [], relationship: [], personality: [], story: [] };
@@ -202,6 +206,7 @@
     const deck = currentDeck[type];
     if (deck.length === 0) return null;
     const card = deck.pop();
+    totalDrawnCount[type]++;
     drawn[type].push({ text: card, revealed: false });
     return card;
   }
@@ -227,8 +232,25 @@
     updateDrawUI();
   }
 
+  function replenishOne(type) {
+    const limit = limits[type];
+    if (limit.discard === 0 || totalDrawnCount[type] >= REPLENISH_MAX) return;
+    const card = drawOne(type);
+    if (!card) return;
+    drawn[type][drawn[type].length - 1].revealed = true;
+    kept[type].forEach(t => drawn[type].unshift({ text: t, revealed: true }));
+    kept[type].length = 0;
+    discardMode = true;
+    renderDrawnCards(type);
+    updateDrawUI();
+  }
+
   function discardByIndex(type, index) {
+    const limit = limits[type];
     const removed = drawn[type].splice(index, 1)[0];
+    if (kept[type].length >= limit.keep) {
+      kept[type].length = 0;
+    }
     drawn[type].forEach(c => {
       kept[type].push(c.text);
     });
@@ -242,6 +264,10 @@
     drawn = { character: [], relationship: [], personality: [], story: [] };
     kept = { character: [], relationship: [], personality: [], story: [] };
     currentDeck = {};
+    totalDrawnCount.character = 0;
+    totalDrawnCount.relationship = 0;
+    totalDrawnCount.personality = 0;
+    totalDrawnCount.story = 0;
     pendingReveal = null;
     discardMode = false;
     ['character', 'relationship', 'personality', 'story'].forEach(type => {
@@ -264,7 +290,8 @@
     const drawnCount = drawn[type].length;
     const keptCount = kept[type].length;
     const allRevealed = drawn[type].every(c => c.revealed);
-    const needDiscard = limit.discard > 0 && drawnCount === limit.draw && allRevealed && keptCount < limit.keep;
+    const isReplenishDiscard = limit.discard > 0 && drawnCount === limit.keep + 1 && keptCount === 0 && allRevealed;
+    const needDiscard = (limit.discard > 0 && drawnCount === limit.draw && allRevealed) || isReplenishDiscard;
     const storyDone = type === 'story' && keptCount === 4;
 
     const btnDraw = document.querySelector('.btn-draw');
@@ -272,15 +299,39 @@
     const btnDiscard = document.querySelector('.btn-discard');
     const deckPrompt = document.querySelector('.deck-prompt');
 
+    const btnReplenish = document.getElementById('btn-replenish');
+    
+    // 檢查是否已達到補牌上限
+    const reachedMax = totalDrawnCount[type] >= REPLENISH_MAX;
+    const canReplenish = limit.discard > 0 && keptCount === limit.keep && drawnCount === 0
+      && totalDrawnCount[type] < REPLENISH_MAX;
+
+    if (btnReplenish) btnReplenish.classList.toggle('hidden', !canReplenish);
+
+    // 1. 劇情卡完成判斷
     if (storyDone) {
       btnDraw.disabled = true;
+      if (btnReplenish) btnReplenish.classList.add('hidden');
       btnReveal.classList.add('hidden');
       btnDiscard.classList.add('hidden');
       deckPrompt.textContent = '劇情卡已抽完 4 張';
       return;
     }
-    if (drawnCount >= limit.draw) {
+
+    // 2. 新增：判斷是否達到補牌次數極限且已完成當前挑選
+    if (reachedMax && drawnCount === 0 && keptCount === limit.keep) {
       btnDraw.disabled = true;
+      if (btnReplenish) btnReplenish.classList.add('hidden');
+      btnReveal.classList.add('hidden');
+      btnDiscard.classList.add('hidden');
+      deckPrompt.textContent = `已達補牌上限 (${REPLENISH_MAX}張)，無法繼續抽取。若不滿意請「全部清除重抽」。`;
+      return;
+    }
+
+    // 3. 原有的抽牌與丟棄邏輯
+    if (drawnCount >= limit.draw || isReplenishDiscard) {
+      btnDraw.disabled = true;
+      if (btnReplenish) btnReplenish.classList.add('hidden');
       if (!allRevealed) {
         btnReveal.classList.remove('hidden');
         deckPrompt.textContent = '已抽滿，請點「翻開揭曉」';
@@ -298,10 +349,21 @@
         else deckPrompt.textContent = '此類型已完成';
       }
     } else {
-      btnDraw.disabled = false;
+      btnDraw.disabled = canReplenish;
       btnReveal.classList.add('hidden');
       btnDiscard.classList.add('hidden');
-      deckPrompt.textContent = `已抽 ${drawnCount} / ${limit.draw} 張，點「抽一張」繼續`;
+      if (canReplenish) {
+        deckPrompt.textContent = `可補牌（本組已抽 ${totalDrawnCount[type]} / ${REPLENISH_MAX} 張），抽一張後揭曉並丟棄一張`;
+      } else {
+        // 如果還沒抽滿且已達上限 (這種情況通常發生在抽牌中途)
+        if (reachedMax) {
+          deckPrompt.textContent = `已達次數上限，請完成目前的挑選。`;
+        } else {
+          deckPrompt.textContent = keptCount >= limit.keep
+            ? `補牌：再抽 ${limit.draw - drawnCount} 張，可重新選留 ${limit.keep} 張`
+            : `已抽 ${drawnCount} / ${limit.draw} 張，點「抽一張」繼續`;
+        }
+      }
     }
   }
 
@@ -314,8 +376,10 @@
     if (!drawnList || !keptList) return;
 
     const limit = limits[type];
-    const needDiscard = limit.discard > 0 && drawn[type].length === limit.draw
-      && drawn[type].every(c => c.revealed) && kept[type].length < limit.keep;
+    const isReplenishDiscard = limit.discard > 0 && drawn[type].length === limit.keep + 1
+      && kept[type].length === 0 && drawn[type].every(c => c.revealed);
+    const needDiscard = (limit.discard > 0 && drawn[type].length === limit.draw && drawn[type].every(c => c.revealed))
+      || isReplenishDiscard;
 
     drawnList.innerHTML = drawn[type].map((c, i) => {
       const selectable = needDiscard && discardMode;
@@ -393,6 +457,11 @@
         renderDrawnCards(currentType);
         updateDrawUI();
       }
+    });
+
+    const btnReplenish = document.getElementById('btn-replenish');
+    if (btnReplenish) btnReplenish.addEventListener('click', function () {
+      replenishOne(currentType);
     });
 
     document.querySelector('.btn-reveal').addEventListener('click', function () {

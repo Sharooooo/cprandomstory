@@ -219,6 +219,18 @@ body {
   background: var(--accent-hover);
 }
 
+.btn-replenish {
+  background: var(--gold);
+  color: var(--bg);
+  border: 2px solid var(--gold);
+  margin-right: 0.5rem;
+}
+
+.btn-replenish:hover:not(:disabled) {
+  background: transparent;
+  color: var(--gold);
+}
+
 .btn-discard {
   background: var(--card-face);
   color: var(--text);
