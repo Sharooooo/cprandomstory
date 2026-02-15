@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>抽牌系統</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <button type="button" class="nav-btn active" data-page="draw">抽卡</button>
+    <button type="button" class="nav-btn" data-page="settings">設定抽卡參數</button>
+    <button type="button" class="theme-toggle" id="theme-toggle" title="切換淺色／深色">🌙 淺色</button>
+  </nav>
+
+  <!-- 抽卡頁面 -->
+  <main id="page-draw" class="page active">
+    <section class="draw-section">
+      <h1>抽卡</h1>
+      <div class="card-type-tabs">
+        <button type="button" class="type-tab active" data-type="character">人物卡</button>
+        <button type="button" class="type-tab" data-type="relationship">關係卡</button>
+        <button type="button" class="type-tab" data-type="personality">個性卡</button>
+        <button type="button" class="type-tab" data-type="story">劇情卡</button>
+      </div>
+
+      <div class="draw-rules">
+        <p class="rules-text" data-rules="character">規則：抽 3 張，翻開後去掉 1 張，保留 2 張</p>
+        <p class="rules-text hidden" data-rules="relationship">規則：抽 2 張，翻開後去掉 1 張，保留 1 張</p>
+        <p class="rules-text hidden" data-rules="personality">規則：抽 3 張，翻開後去掉 1 張，保留 2 張</p>
+        <p class="rules-text hidden" data-rules="story">規則：共抽 4 張</p>
+      </div>
+
+      <div class="draw-area">
+        <div class="deck-prompt">選擇上方卡牌類型後，點擊「抽一張」開始</div>
+        <button type="button" class="btn btn-draw" disabled>抽一張</button>
+        <button type="button" class="btn btn-reveal hidden">翻開揭曉</button>
+        <button type="button" class="btn btn-discard hidden">去掉一張（選中後點此）</button>
+      </div>
+
+      <div class="drawn-cards" data-type="character">
+        <h3>人物卡（已抽 / 保留）</h3>
+        <div class="cards-row drawn-list"></div>
+        <div class="cards-row kept-list"></div>
+      </div>
+      <div class="drawn-cards hidden" data-type="relationship">
+        <h3>關係卡（已抽 / 保留 1 張）</h3>
+        <div class="cards-row drawn-list"></div>
+        <div class="cards-row kept-list"></div>
+      </div>
+      <div class="drawn-cards hidden" data-type="personality">
+        <h3>個性卡（已抽 / 保留）</h3>
+        <div class="cards-row drawn-list"></div>
+        <div class="cards-row kept-list"></div>
+      </div>
+      <div class="drawn-cards hidden" data-type="story">
+        <h3>劇情卡（共 4 張）</h3>
+        <div class="cards-row drawn-list"></div>
+        <div class="cards-row kept-list"></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-clear">全部清除重抽</button>
+        <button type="button" class="btn btn-spread hidden" id="btn-spread">查看牌陣</button>
+      </div>
+
+      <div class="spread-overlay hidden" id="spread-overlay">
+        <div class="spread-modal">
+          <h2>牌陣</h2>
+          <p class="spread-hint">同性質的卡可點選兩張交換位置</p>
+          <div class="spread-grid">
+            <div class="spread-slot slot-personality" data-slot="0" data-type="personality" data-idx="0"></div>
+            <div class="spread-slot slot-personality" data-slot="1" data-type="personality" data-idx="1"></div>
+            <div class="spread-slot slot-story" data-slot="2" data-type="story" data-idx="0"></div>
+            <div class="spread-slot slot-character" data-slot="3" data-type="character" data-idx="0"></div>
+            <div class="spread-slot slot-relationship" data-slot="4" data-type="relationship" data-idx="0"></div>
+            <div class="spread-slot slot-character" data-slot="5" data-type="character" data-idx="1"></div>
+            <div class="spread-slot slot-story" data-slot="6" data-type="story" data-idx="1"></div>
+            <div class="spread-slot slot-story" data-slot="7" data-type="story" data-idx="2"></div>
+            <div class="spread-slot slot-story" data-slot="8" data-type="story" data-idx="3"></div>
+          </div>
+          <button type="button" class="btn btn-close-spread" id="btn-close-spread">關閉</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 設定頁面 -->
+  <main id="page-settings" class="page">
+    <section class="settings-section">
+      <h1>設定抽卡參數</h1>
+      <p class="settings-desc">每行一張卡牌名稱，設定完後回到抽卡頁即可使用新卡池。</p>
+      <label class="save-option">
+        <input type="checkbox" id="save-settings" />
+        保存設定（下次開啟仍使用此卡池）
+      </label>
+
+      <div class="pool-editor">
+        <div class="pool-block">
+          <h3>人物卡 卡池</h3>
+          <textarea id="pool-character" rows="8" placeholder="每行一張，例如：&#10;騎士&#10;魔法師&#10;商人"></textarea>
+        </div>
+        <div class="pool-block">
+          <h3>關係卡 卡池</h3>
+          <textarea id="pool-relationship" rows="8" placeholder="每行一張，例如：&#10;師徒&#10;戀人&#10;對手"></textarea>
+        </div>
+        <div class="pool-block">
+          <h3>個性卡 卡池</h3>
+          <textarea id="pool-personality" rows="8" placeholder="每行一張，例如：&#10;開朗&#10;冷靜&#10;傲嬌"></textarea>
+        </div>
+        <div class="pool-block">
+          <h3>劇情卡 卡池</h3>
+          <textarea id="pool-story" rows="8" placeholder="每行一張，例如：&#10;相遇&#10;決鬥&#10;和解"></textarea>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button type="button" class="btn btn-apply">套用設定</button>
+        <button type="button" class="btn btn-restore" id="btn-restore">恢復預設卡池</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

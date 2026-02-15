@@ -1,0 +1,514 @@
+/* 深色主題：莫蘭迪藍 + 水藍，霧蒙水墨感 */
+:root,
+[data-theme="dark"] {
+  --bg: #4a5f6f;
+  --surface: #5c6d7d;
+  --accent: #7eb8c4;
+  --accent-hover: #8dc4cf;
+  --text: #e8ecf0;
+  --text-muted: #9aa8b5;
+  --card-face: #5a6b7a;
+  --card-border: #7eb8c4;
+  --gold: #a8c4b8;
+  --accent-soft: rgba(126, 184, 196, 0.2);
+  --accent-soft-2: rgba(126, 184, 196, 0.3);
+  --accent-soft-3: rgba(126, 184, 196, 0.15);
+  --accent-border: rgba(126, 184, 196, 0.35);
+  --accent-border-2: rgba(126, 184, 196, 0.45);
+  --card-revealed: linear-gradient(145deg, #6b7d8a, #5a6b7a);
+  --card-back: linear-gradient(145deg, #4a5a68, #5c6d7d);
+}
+
+/* 淺色主題：馬卡龍淺紫 + 馬卡龍色系 + 白 */
+[data-theme="light"] {
+  --bg: #f5f0fa;
+  --surface: #ffffff;
+  --accent: #a78bb8;
+  --accent-hover: #8f73a8;
+  --text: #3d3551;
+  --text-muted: #7a6f8a;
+  --card-face: #ebe3f2;
+  --card-border: #b8a9c9;
+  --gold: #b8a078;
+  --accent-soft: rgba(167, 139, 184, 0.25);
+  --accent-soft-2: rgba(167, 139, 184, 0.35);
+  --accent-soft-3: rgba(167, 139, 184, 0.2);
+  --accent-border: rgba(184, 169, 201, 0.5);
+  --accent-border-2: rgba(184, 169, 201, 0.6);
+  --card-revealed: linear-gradient(145deg, #e8dff0, #ddd2e8);
+  --card-back: linear-gradient(145deg, #d4c8e0, #e0d6ea);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-soft-3) 0%, transparent 50%);
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="dark"] body {
+  background-image: radial-gradient(ellipse at 60% 20%, rgba(126, 184, 196, 0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 40% 80%, rgba(168, 212, 220, 0.08) 0%, transparent 40%);
+}
+
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(184, 169, 201, 0.2) 0%, transparent 50%);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.nav-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.nav-btn:hover {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+
+.nav-btn.active {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-soft-3);
+}
+
+.theme-toggle {
+  margin-left: auto;
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--card-border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.page {
+  display: none;
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  transition: color 0.3s;
+}
+
+.page.active {
+  display: block;
+}
+
+/* 抽卡頁 */
+.draw-section h1,
+.settings-section h1 {
+  margin-top: 0;
+  font-size: 1.75rem;
+  color: var(--gold);
+}
+
+.card-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.type-tab {
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--card-border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.type-tab:hover {
+  background: var(--accent-soft-2);
+}
+
+.type-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.draw-rules {
+  margin-bottom: 1rem;
+}
+
+.rules-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.rules-text.hidden {
+  display: none;
+}
+
+.draw-area {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--accent-border);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.deck-prompt {
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-draw,
+.btn-reveal,
+.btn-apply {
+  background: var(--accent);
+  color: #fff;
+  margin-right: 0.5rem;
+}
+
+.btn-draw:hover:not(:disabled),
+.btn-reveal:hover:not(:disabled),
+.btn-apply:hover {
+  background: var(--accent-hover);
+}
+
+.btn-discard {
+  background: var(--card-face);
+  color: var(--text);
+  border: 1px solid var(--accent);
+}
+
+.btn-discard:hover:not(:disabled) {
+  background: var(--accent-soft-2);
+}
+
+.btn-clear {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+.btn-clear:hover {
+  background: var(--accent-soft-3);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.drawn-cards {
+  margin-bottom: 1.5rem;
+}
+
+.drawn-cards h3 {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 60px;
+  align-items: flex-start;
+}
+
+.card-item {
+  width: 100px;
+  min-height: 130px;
+  border-radius: 8px;
+  border: 2px solid var(--card-border);
+  background: var(--card-face);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.card-item.revealed {
+  background: var(--card-revealed);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .card-item.revealed {
+  box-shadow: 0 4px 16px rgba(126, 184, 196, 0.2);
+}
+
+[data-theme="light"] .card-item.revealed {
+  box-shadow: 0 4px 12px rgba(167, 139, 184, 0.25);
+}
+
+.card-item.back {
+  background: var(--card-back);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.card-item.discard-candidate {
+  outline: 3px solid var(--gold);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.card-item .card-label {
+  word-break: break-all;
+}
+
+.actions {
+  margin-top: 1rem;
+}
+
+/* 設定頁 */
+.settings-section .settings-desc {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.save-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.save-option input {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: var(--accent);
+}
+
+.pool-editor {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pool-block h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--gold);
+}
+
+.pool-block textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--accent-border-2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.pool-block textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pool-block textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-restore {
+  background: transparent;
+  color: var(--text-muted);
+  border: 2px solid var(--text-muted);
+}
+
+.btn-restore:hover {
+  color: var(--text);
+  border-color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (min-width: 600px) {
+  .pool-editor {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 牌陣 */
+.btn-spread {
+  margin-left: 0.5rem;
+  background: var(--gold);
+  color: var(--bg);
+  border: 2px solid var(--gold);
+}
+
+.btn-spread:hover {
+  background: transparent;
+  color: var(--gold);
+}
+
+.spread-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.spread-overlay.hidden {
+  display: none !important;
+}
+
+.spread-modal {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  border: 2px solid var(--card-border);
+}
+
+.spread-modal h2 {
+  margin-top: 0;
+  text-align: center;
+  color: var(--gold);
+  font-size: 1.25rem;
+}
+
+.spread-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.spread-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.spread-slot {
+  aspect-ratio: 3/4;
+  min-height: 70px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  font-size: 0.8rem;
+  text-align: center;
+  word-break: break-all;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.spread-slot:hover {
+  transform: scale(1.02);
+}
+
+.spread-slot.selected {
+  box-shadow: 0 0 0 3px var(--gold);
+  transform: scale(1.03);
+}
+
+.slot-character {
+  border: 3px solid #e63946;
+  background: rgba(230, 57, 70, 0.08);
+}
+
+.slot-personality {
+  border: 3px solid #e9c46a;
+  background: rgba(233, 196, 106, 0.15);
+}
+
+.slot-relationship {
+  border: 3px solid #2a9d8f;
+  background: rgba(42, 157, 143, 0.1);
+}
+
+.slot-story {
+  border: 3px solid #9b5de5;
+  background: rgba(155, 93, 229, 0.1);
+}
+
+.btn-close-spread {
+  display: block;
+  margin: 0 auto;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+}
+
+.btn-close-spread:hover {
+  background: var(--accent-hover);
+}
+
+.spread-slot:nth-child(1) { grid-column: 2; grid-row: 1; }
+.spread-slot:nth-child(2) { grid-column: 4; grid-row: 1; }
+.spread-slot:nth-child(3) { grid-column: 1; grid-row: 2; }
+.spread-slot:nth-child(4) { grid-column: 2; grid-row: 2; }
+.spread-slot:nth-child(5) { grid-column: 3; grid-row: 2; }
+.spread-slot:nth-child(6) { grid-column: 4; grid-row: 2; }
+.spread-slot:nth-child(7) { grid-column: 5; grid-row: 2; }
+.spread-slot:nth-child(8) { grid-column: 2; grid-row: 3; }
+.spread-slot:nth-child(9) { grid-column: 4; grid-row: 3; }
