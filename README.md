@@ -1,1 +1,1 @@
-# cprandomstory
+# CP隨機故事產生器
